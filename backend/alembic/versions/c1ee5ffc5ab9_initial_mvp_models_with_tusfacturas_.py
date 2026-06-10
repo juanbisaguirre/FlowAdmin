@@ -1,8 +1,8 @@
-"""Initial MVP models
+"""Initial MVP models with TusFacturas integration
 
-Revision ID: f7527b3be306
+Revision ID: c1ee5ffc5ab9
 Revises: 
-Create Date: 2026-06-07 00:59:30.283903
+Create Date: 2026-06-07 20:02:56.275457
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f7527b3be306'
+revision: str = 'c1ee5ffc5ab9'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,21 +34,51 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_tenants_cuit_rut'), 'tenants', ['cuit_rut'], unique=True)
     op.create_index(op.f('ix_tenants_id'), 'tenants', ['id'], unique=False)
-    op.create_table('clients',
+    op.create_table('company_billing_credentials',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('tenant_id', sa.String(), nullable=False),
-    sa.Column('legal_name', sa.String(), nullable=False),
-    sa.Column('commercial_name', sa.String(), nullable=True),
-    sa.Column('cuit', sa.String(), nullable=False),
+    sa.Column('provider', sa.String(), nullable=True),
+    sa.Column('apikey', sa.String(), nullable=True),
+    sa.Column('apitoken', sa.String(), nullable=True),
+    sa.Column('usertoken', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('tenant_id')
+    )
+    op.create_index(op.f('ix_company_billing_credentials_id'), 'company_billing_credentials', ['id'], unique=False)
+    op.create_table('customers',
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('tenant_id', sa.String(), nullable=False),
+    sa.Column('business_name', sa.String(), nullable=False),
+    sa.Column('document_type', sa.String(), nullable=True),
+    sa.Column('document_number', sa.String(), nullable=False),
+    sa.Column('vat_condition', sa.String(), nullable=True),
     sa.Column('address', sa.String(), nullable=True),
+    sa.Column('province', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('phone', sa.String(), nullable=True),
     sa.Column('status', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_clients_cuit'), 'clients', ['cuit'], unique=False)
-    op.create_index(op.f('ix_clients_id'), 'clients', ['id'], unique=False)
+    op.create_index(op.f('ix_customers_document_number'), 'customers', ['document_number'], unique=False)
+    op.create_index(op.f('ix_customers_id'), 'customers', ['id'], unique=False)
+    op.create_table('products',
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('tenant_id', sa.String(), nullable=False),
+    sa.Column('code', sa.String(), nullable=True),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('vat_rate', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('unit', sa.String(), nullable=True),
+    sa.Column('active', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('tenant_id', sa.String(), nullable=False),
@@ -65,15 +95,20 @@ def upgrade() -> None:
     op.create_table('invoices',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('tenant_id', sa.String(), nullable=False),
-    sa.Column('client_id', sa.String(), nullable=False),
+    sa.Column('customer_id', sa.String(), nullable=False),
     sa.Column('invoice_type', sa.String(), nullable=False),
+    sa.Column('invoice_number', sa.String(), nullable=True),
+    sa.Column('status', sa.String(), nullable=True),
+    sa.Column('subtotal', sa.Numeric(precision=10, scale=2), nullable=True),
+    sa.Column('taxes', sa.Numeric(precision=10, scale=2), nullable=True),
+    sa.Column('total', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('cae', sa.String(), nullable=True),
+    sa.Column('cae_expiration', sa.Date(), nullable=True),
+    sa.Column('pdf_url', sa.String(), nullable=True),
     sa.Column('issue_date', sa.Date(), nullable=False),
     sa.Column('due_date', sa.Date(), nullable=True),
-    sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('status', sa.String(), nullable=True),
-    sa.Column('pdf_url', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], ),
     sa.ForeignKeyConstraint(['tenant_id'], ['tenants.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -103,9 +138,13 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
-    op.drop_index(op.f('ix_clients_id'), table_name='clients')
-    op.drop_index(op.f('ix_clients_cuit'), table_name='clients')
-    op.drop_table('clients')
+    op.drop_index(op.f('ix_products_id'), table_name='products')
+    op.drop_table('products')
+    op.drop_index(op.f('ix_customers_id'), table_name='customers')
+    op.drop_index(op.f('ix_customers_document_number'), table_name='customers')
+    op.drop_table('customers')
+    op.drop_index(op.f('ix_company_billing_credentials_id'), table_name='company_billing_credentials')
+    op.drop_table('company_billing_credentials')
     op.drop_index(op.f('ix_tenants_id'), table_name='tenants')
     op.drop_index(op.f('ix_tenants_cuit_rut'), table_name='tenants')
     op.drop_table('tenants')

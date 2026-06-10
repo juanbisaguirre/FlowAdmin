@@ -34,16 +34,19 @@ def create_invoice(
     """
     Create a new invoice and its items.
     """
-    # Verify client belongs to tenant
-    client = db.query(Client).filter(
-        Client.id == invoice_in.client_id,
-        Client.tenant_id == current_user.tenant_id
+    from app.db.models import Customer
+    # Verify customer belongs to tenant
+    customer = db.query(Customer).filter(
+        Customer.id == invoice_in.customer_id,
+        Customer.tenant_id == current_user.tenant_id
     ).first()
     
-    if not client:
-        raise HTTPException(status_code=404, detail="Client not found")
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
 
     # Calculate total and items totals
+    invoice_subtotal = Decimal("0.0")
+    invoice_taxes = Decimal("0.0")
     invoice_total = Decimal("0.0")
     db_items = []
     
@@ -52,9 +55,12 @@ def create_invoice(
     
     for item in invoice_in.items:
         # Calculate subtotal + tax
-        item_subtotal = item.quantity * item.unit_price
-        item_tax = item_subtotal * (item.tax_rate / Decimal("100.0"))
+        item_subtotal = Decimal(str(item.quantity)) * Decimal(str(item.unit_price))
+        item_tax = item_subtotal * (Decimal(str(item.tax_rate)) / Decimal("100.0"))
         item_total = item_subtotal + item_tax
+        
+        invoice_subtotal += item_subtotal
+        invoice_taxes += item_tax
         invoice_total += item_total
         
         db_items.append(
@@ -72,11 +78,13 @@ def create_invoice(
     db_invoice = Invoice(
         id=invoice_id,
         tenant_id=current_user.tenant_id,
-        client_id=invoice_in.client_id,
+        customer_id=invoice_in.customer_id,
         invoice_type=invoice_in.invoice_type,
         issue_date=invoice_in.issue_date,
         due_date=invoice_in.due_date,
-        total_amount=invoice_total,
+        subtotal=invoice_subtotal,
+        taxes=invoice_taxes,
+        total=invoice_total,
         status="draft" # initial status
     )
     
@@ -97,8 +105,7 @@ def emit_invoice(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Emit invoice (Mock integration with AFIP or electronic billing).
-    Generates a mock CAE and changes status to 'sent'.
+    Emit invoice using TusFacturasAPP integration via BillingService.
     """
     invoice = db.query(Invoice).filter(
         Invoice.tenant_id == current_user.tenant_id,
@@ -111,12 +118,45 @@ def emit_invoice(
     if invoice.status != "draft":
         raise HTTPException(status_code=400, detail="Only draft invoices can be emitted")
         
-    # Mock CAE generation
-    import random
-    invoice.cae = "".join([str(random.randint(0, 9)) for _ in range(14)])
-    invoice.status = "sent"
+    # Get Customer
+    from app.db.models import Customer
+    customer = db.query(Customer).filter(Customer.id == invoice.customer_id).first()
     
-    db.add(invoice)
-    db.commit()
-    db.refresh(invoice)
+    # Process emission using BillingService
+    from app.services.billing.service import BillingService
+    try:
+        billing_service = BillingService(db=db, tenant_id=current_user.tenant_id)
+        invoice = billing_service.process_invoice_emission(invoice, customer)
+    except Exception as e:
+        import logging
+        logging.error(f"Emission failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Billing provider error: {str(e)}")
+        
     return invoice
+
+@router.get("/{id}/pdf")
+def get_invoice_pdf_url(
+    *,
+    db: Session = Depends(get_db),
+    id: str,
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Get signed URL to download PDF from S3.
+    """
+    invoice = db.query(Invoice).filter(
+        Invoice.tenant_id == current_user.tenant_id,
+        Invoice.id == id
+    ).first()
+    
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+        
+    if not invoice.pdf_url:
+        raise HTTPException(status_code=404, detail="PDF not available yet")
+        
+    from app.services.storage.s3 import S3StorageService
+    s3_service = S3StorageService()
+    url = s3_service.generate_presigned_url(invoice.pdf_url)
+    
+    return {"url": url}

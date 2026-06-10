@@ -20,8 +20,11 @@ class Tenant(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")
-    clients = relationship("Client", back_populates="tenant", cascade="all, delete-orphan")
+    customers = relationship("Customer", back_populates="tenant", cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="tenant", cascade="all, delete-orphan")
     invoices = relationship("Invoice", back_populates="tenant", cascade="all, delete-orphan")
+    billing_credentials = relationship("CompanyBillingCredentials", back_populates="tenant", cascade="all, delete-orphan", uselist=False)
+    uploaded_files = relationship("UploadedFile", back_populates="tenant", cascade="all, delete-orphan")
 
 class User(Base):
     __tablename__ = "users"
@@ -36,39 +39,80 @@ class User(Base):
 
     tenant = relationship("Tenant", back_populates="users")
 
-class Client(Base):
-    __tablename__ = "clients"
+class CompanyBillingCredentials(Base):
+    __tablename__ = "company_billing_credentials"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    tenant_id = Column(String, ForeignKey("tenants.id"), unique=True, nullable=False)
+    provider = Column(String, default="TusFacturas")
+    apikey = Column(String)
+    apitoken = Column(String)
+    usertoken = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    tenant = relationship("Tenant", back_populates="billing_credentials")
+
+class Customer(Base):
+    __tablename__ = "customers"
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     tenant_id = Column(String, ForeignKey("tenants.id"), nullable=False)
-    legal_name = Column(String, nullable=False)
-    commercial_name = Column(String)
-    cuit = Column(String, index=True, nullable=False)
+    business_name = Column(String, nullable=False)
+    document_type = Column(String) # CUIT, DNI
+    document_number = Column(String, index=True, nullable=False)
+    vat_condition = Column(String)
     address = Column(String)
+    province = Column(String)
     email = Column(String)
     phone = Column(String)
     status = Column(String, default="active")
 
-    tenant = relationship("Tenant", back_populates="clients")
-    invoices = relationship("Invoice", back_populates="client")
+    tenant = relationship("Tenant", back_populates="customers")
+    invoices = relationship("Invoice", back_populates="customer")
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    tenant_id = Column(String, ForeignKey("tenants.id"), nullable=False)
+    code = Column(String)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    price = Column(Numeric(10, 2), nullable=False)
+    vat_rate = Column(Numeric(5, 2), nullable=False)
+    unit = Column(String, default="unidades")
+    active = Column(Boolean, default=True)
+
+    tenant = relationship("Tenant", back_populates="products")
 
 class Invoice(Base):
     __tablename__ = "invoices"
 
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     tenant_id = Column(String, ForeignKey("tenants.id"), nullable=False)
-    client_id = Column(String, ForeignKey("clients.id"), nullable=False)
+    customer_id = Column(String, ForeignKey("customers.id"), nullable=False)
     
-    invoice_type = Column(String, nullable=False) # A, B, C
+    invoice_type = Column(String, nullable=False) # A, B, C, NC, ND
+    invoice_number = Column(String) # assigned by provider
+    
+    status = Column(String, default="draft") # draft, processing, approved, rejected, cancelled
+    
+    subtotal = Column(Numeric(10, 2), default=0)
+    taxes = Column(Numeric(10, 2), default=0)
+    total = Column(Numeric(10, 2), nullable=False)
+    
     cae = Column(String)
+    cae_expiration = Column(Date)
+    
+    pdf_url = Column(String)
+    
     issue_date = Column(Date, nullable=False)
     due_date = Column(Date)
-    total_amount = Column(Numeric(10, 2), nullable=False)
-    status = Column(String, default="draft") # draft, sent, paid, overdue
-    pdf_url = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     tenant = relationship("Tenant", back_populates="invoices")
-    client = relationship("Client", back_populates="invoices")
+    customer = relationship("Customer", back_populates="invoices")
     items = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
 
 class InvoiceItem(Base):
@@ -84,3 +128,15 @@ class InvoiceItem(Base):
     total = Column(Numeric(10, 2), nullable=False)
 
     invoice = relationship("Invoice", back_populates="items")
+
+class UploadedFile(Base):
+    __tablename__ = "uploaded_files"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    tenant_id = Column(String, ForeignKey("tenants.id"), nullable=False)
+    file_name = Column(String, nullable=False)
+    original_name = Column(String, nullable=False)
+    content_type = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    tenant = relationship("Tenant", back_populates="uploaded_files")

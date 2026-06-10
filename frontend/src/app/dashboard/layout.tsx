@@ -23,6 +23,9 @@ export default function DashboardLayout({
             <Link href="/dashboard/invoices" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
               Facturación
             </Link>
+            <Link href="/dashboard/settings/billing" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
+              Configuración
+            </Link>
           </nav>
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <Link href="/login" className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">

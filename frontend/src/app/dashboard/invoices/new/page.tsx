@@ -11,39 +11,39 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 export default function NewInvoicePage() {
   const router = useRouter()
-  const [clients, setClients] = useState<any[]>([])
+  const [customers, setCustomers] = useState<any[]>([])
   
   // Invoice form states
-  const [clientId, setClientId] = useState("")
+  const [customerId, setCustomerId] = useState("")
   const [invoiceType, setInvoiceType] = useState("C")
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0])
   const [items, setItems] = useState([{ description: "", quantity: 1, unit_price: 0, tax_rate: 21 }])
 
   useEffect(() => {
-    // Fetch clients for the dropdown
-    const fetchClients = async () => {
+    // Fetch customers for the dropdown
+    const fetchCustomers = async () => {
       const token = localStorage.getItem("token")
       if (!token) return
       try {
-        const res = await fetch("http://localhost:8000/api/v1/clients/", {
+        const res = await fetch("http://localhost:8000/api/v1/customers/", {
           headers: { "Authorization": `Bearer ${token}` }
         })
         if (res.ok) {
           const data = await res.json()
-          setClients(data)
+          setCustomers(data)
         }
       } catch (e) {
         console.error(e)
       }
     }
-    fetchClients()
+    fetchCustomers()
   }, [])
 
   const addItem = () => {
     setItems([...items, { description: "", quantity: 1, unit_price: 0, tax_rate: 21 }])
   }
 
-  const updateItem = (index: int, field: string, value: any) => {
+  const updateItem = (index: number, field: string, value: any) => {
     const newItems = [...items]
     newItems[index] = { ...newItems[index], [field]: value }
     setItems(newItems)
@@ -59,7 +59,7 @@ export default function NewInvoicePage() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          client_id: clientId,
+          customer_id: customerId,
           invoice_type: invoiceType,
           issue_date: issueDate,
           items: items.map(item => ({
@@ -104,13 +104,13 @@ export default function NewInvoicePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Cliente</Label>
-              <Select value={clientId} onValueChange={setClientId}>
+              <Select value={customerId} onValueChange={setCustomerId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un cliente..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.legal_name} ({c.cuit})</SelectItem>
+                  {customers.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.business_name} ({c.document_number})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -123,9 +123,12 @@ export default function NewInvoicePage() {
                   <SelectValue placeholder="Tipo..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="A">Factura A</SelectItem>
-                  <SelectItem value="B">Factura B</SelectItem>
-                  <SelectItem value="C">Factura C</SelectItem>
+                  <SelectItem value="Factura A">Factura A</SelectItem>
+                  <SelectItem value="Factura B">Factura B</SelectItem>
+                  <SelectItem value="Factura C">Factura C</SelectItem>
+                  <SelectItem value="Nota de Credito A">Nota de Crédito A</SelectItem>
+                  <SelectItem value="Nota de Credito B">Nota de Crédito B</SelectItem>
+                  <SelectItem value="Nota de Credito C">Nota de Crédito C</SelectItem>
                 </SelectContent>
               </Select>
             </div>
