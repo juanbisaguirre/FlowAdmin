@@ -42,6 +42,7 @@ class InvoiceSchema(InvoiceBase):
     cae: Optional[str] = None
     cae_expiration: Optional[date] = None
     pdf_url: Optional[str] = None
+    error_message: Optional[str] = None
     items: List[InvoiceItemSchema] = []
 
     class Config:

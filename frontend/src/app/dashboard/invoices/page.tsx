@@ -94,10 +94,17 @@ export default function InvoicesPage() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Procesando</span>
                     )}
                     {invoice.status === "approved" && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aprobada</span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Enviada</span>
                     )}
                     {invoice.status === "rejected" && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rechazada</span>
+                      <div className="flex flex-col gap-1">
+                        <span className="inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rechazada</span>
+                        {invoice.error_message && (
+                          <span className="text-[10px] leading-tight text-red-500 max-w-[200px]" title={invoice.error_message}>
+                            {invoice.error_message}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
@@ -124,7 +131,7 @@ export default function InvoicesPage() {
                         Ver PDF
                       </Button>
                     )}
-                    {invoice.status === "draft" && (
+                    {(invoice.status === "draft" || invoice.status === "rejected") && (
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -146,7 +153,7 @@ export default function InvoicesPage() {
                           }
                         }}
                       >
-                        Emitir Factura
+                        {invoice.status === "rejected" ? "Reintentar Envío" : "Emitir Factura"}
                       </Button>
                     )}
                   </TableCell>

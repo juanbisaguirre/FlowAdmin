@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # AUTH
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-for-jwt-development-only")
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
 
     class Config:
         case_sensitive = True

@@ -70,22 +70,51 @@ class TusFacturasProvider(BillingProvider):
         
         logger.info(f"Sending request to TusFacturas: {url}")
         
-        # MOCKING the actual request for development so we don't spam their API without real credentials
-        # In a real environment:
-        # response = requests.post(url, json=payload, headers=headers)
-        # response.raise_for_status()
-        # return response.json()
-        
-        import uuid
-        import datetime
-        return {
-            "status": "success",
-            "cae": str(uuid.uuid4().int)[:14],
-            "cae_expiration": (datetime.datetime.now() + datetime.timedelta(days=10)).strftime("%d/%m/%Y"),
-            "invoice_number": "0001-00000001"
-        }
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                return {"status": "error", "error_message": data.get("error")}
+            
+            # Mapping assuming standard AFIP-like response from TusFacturas
+            return {
+                "status": "success",
+                "cae": data.get("cae"),
+                "cae_expiration": data.get("cae_vto"),
+                "invoice_number": data.get("comprobante_nro")
+            }
+            
+        except requests.exceptions.RequestException as e:
+            error_msg = str(e)
+            if getattr(e, 'response', None) is not None:
+                try:
+                    error_msg = e.response.json().get("error", e.response.text)
+                except Exception:
+                    error_msg = e.response.text
+            logger.error(f"TusFacturas API error: {error_msg}")
+            return {"status": "error", "error_message": f"Provider API error: {error_msg}"}
         
     def get_pdf(self, invoice_id: str, credentials: Any) -> bytes:
         """Retrieves the generated PDF from the provider"""
-        # MOCK PDF generation
-        return b"%PDF-1.4 Mock TusFacturas PDF content"
+        url = f"{self.BASE_URL}/facturacion/pdf/{invoice_id}"
+        
+        apikey = decrypt(credentials.apikey)
+        apitoken = decrypt(credentials.apitoken)
+        
+        headers = {
+            "Authorization": f"Bearer {apitoken}"
+        }
+        
+        try:
+            response = requests.get(
+                url, 
+                headers=headers, 
+                params={"apikey": apikey, "usertoken": decrypt(credentials.usertoken)}
+            )
+            response.raise_for_status()
+            return response.content
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to fetch PDF from TusFacturas: {e}")
+            raise Exception(f"PDF Retrieval failed: {str(e)}")

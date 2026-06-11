@@ -18,8 +18,13 @@ def encrypt(text: str) -> str:
     f = _get_fernet()
     return f.encrypt(text.encode('utf-8')).decode('utf-8')
 
+from cryptography.fernet import Fernet, InvalidToken
+
 def decrypt(encrypted_text: str) -> str:
     if not encrypted_text:
         return encrypted_text
     f = _get_fernet()
-    return f.decrypt(encrypted_text.encode('utf-8')).decode('utf-8')
+    try:
+        return f.decrypt(encrypted_text.encode('utf-8')).decode('utf-8')
+    except InvalidToken:
+        return encrypted_text

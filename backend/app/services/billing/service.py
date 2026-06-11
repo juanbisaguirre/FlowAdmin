@@ -61,6 +61,7 @@ class BillingService:
             else:
                 # Rejected
                 invoice.status = "rejected"
+                invoice.error_message = response.get("error_message") or "Provider rejected the request"
                 logger.error(f"Invoice {invoice.id} rejected by provider. Response: {response}")
 
             self.db.commit()
@@ -71,9 +72,9 @@ class BillingService:
                 
         except Exception as e:
             logger.error(f"Error during invoice emission: {str(e)}")
-            invoice.status = "draft" # Revert to draft on hard failure
+            invoice.status = "rejected" 
+            invoice.error_message = f"Internal emission error: {str(e)}"
             self.db.commit()
-            raise e
 
         return invoice
 

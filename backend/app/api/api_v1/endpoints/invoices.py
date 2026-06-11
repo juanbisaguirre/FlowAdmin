@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.db.database import get_db
-from app.db.models import Invoice, InvoiceItem, User, Client
-from app.schemas.invoice import Invoice as InvoiceSchema, InvoiceCreate
+from app.db.models import Invoice, InvoiceItem, User
+from app.schemas.invoice import InvoiceSchema, InvoiceCreate
 
 router = APIRouter()
 
@@ -115,8 +115,8 @@ def emit_invoice(
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
         
-    if invoice.status != "draft":
-        raise HTTPException(status_code=400, detail="Only draft invoices can be emitted")
+    if invoice.status not in ("draft", "rejected"):
+        raise HTTPException(status_code=400, detail="Only draft or rejected invoices can be emitted")
         
     # Get Customer
     from app.db.models import Customer

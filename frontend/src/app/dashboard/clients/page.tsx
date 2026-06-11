@@ -13,6 +13,7 @@ export default function CustomersPage() {
   const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [error, setError] = useState("")
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Form states
   const [businessName, setBusinessName] = useState("")
@@ -47,14 +48,20 @@ export default function CustomersPage() {
     fetchCustomers()
   }, [])
 
-  const handleCreateCustomer = async (e: React.FormEvent) => {
+  const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     const token = localStorage.getItem("token")
     
     try {
-      const res = await fetch("http://localhost:8000/api/v1/customers/", {
-        method: "POST",
+      const url = editingId 
+        ? `http://localhost:8000/api/v1/customers/${editingId}` 
+        : "http://localhost:8000/api/v1/customers/"
+        
+      const method = editingId ? "PUT" : "POST"
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
@@ -72,17 +79,60 @@ export default function CustomersPage() {
       if (res.ok) {
         setIsSheetOpen(false)
         fetchCustomers()
-        // Reset form
-        setBusinessName("")
-        setDocumentNumber("")
-        setEmail("")
-        setPhone("")
+        resetForm()
       } else {
         const err = await res.json()
-        setError(err.detail || "Error creating customer")
+        setError(err.detail || "Error saving customer")
       }
     } catch (e) {
       setError("Network error")
+    }
+  }
+
+  const resetForm = () => {
+    setEditingId(null)
+    setBusinessName("")
+    setDocumentType("CUIT")
+    setDocumentNumber("")
+    setVatCondition("Responsable Inscripto")
+    setEmail("")
+    setPhone("")
+    setError("")
+  }
+
+  const openNewCustomer = () => {
+    resetForm()
+    setIsSheetOpen(true)
+  }
+
+  const handleEditClick = (customer: any) => {
+    setEditingId(customer.id)
+    setBusinessName(customer.business_name)
+    setDocumentType(customer.document_type || "CUIT")
+    setDocumentNumber(customer.document_number)
+    setVatCondition(customer.vat_condition || "Responsable Inscripto")
+    setEmail(customer.email || "")
+    setPhone(customer.phone || "")
+    setError("")
+    setIsSheetOpen(true)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este cliente?")) return;
+    
+    const token = localStorage.getItem("token")
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/customers/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      if (res.ok) {
+        fetchCustomers()
+      } else {
+        alert("Error eliminando cliente")
+      }
+    } catch (e) {
+      alert("Error de red")
     }
   }
 
@@ -94,18 +144,21 @@ export default function CustomersPage() {
           <p className="text-gray-500 dark:text-gray-400">Gestiona los clientes de tu empresa.</p>
         </div>
         
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">+ Nuevo Cliente</Button>
+        <Sheet open={isSheetOpen} onOpenChange={(open) => {
+          if (!open) resetForm()
+          setIsSheetOpen(open)
+        }}>
+          <SheetTrigger render={<Button className="bg-indigo-600 hover:bg-indigo-700" onClick={openNewCustomer} />}>
+            + Nuevo Cliente
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
-              <SheetTitle>Agregar Nuevo Cliente</SheetTitle>
+              <SheetTitle>{editingId ? "Editar Cliente" : "Agregar Nuevo Cliente"}</SheetTitle>
               <SheetDescription>
-                Ingresa los datos del cliente para facturación electrónica.
+                {editingId ? "Modifica los datos del cliente." : "Ingresa los datos del cliente para facturación electrónica."}
               </SheetDescription>
             </SheetHeader>
-            <form onSubmit={handleCreateCustomer} className="space-y-4 mt-6">
+            <form onSubmit={handleSaveCustomer} className="space-y-4 mt-6">
               {error && (
                 <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
                   {error}
@@ -188,8 +241,9 @@ export default function CustomersPage() {
                   <TableCell>{customer.document_type} {customer.document_number}</TableCell>
                   <TableCell>{customer.vat_condition}</TableCell>
                   <TableCell>{customer.email || "-"}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="text-indigo-600">Editar</Button>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="sm" className="text-indigo-600" onClick={() => handleEditClick(customer)}>Editar</Button>
+                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(customer.id)}>Eliminar</Button>
                   </TableCell>
                 </TableRow>
               ))

@@ -106,6 +106,7 @@ class Invoice(Base):
     cae_expiration = Column(Date)
     
     pdf_url = Column(String)
+    error_message = Column(String)
     
     issue_date = Column(Date, nullable=False)
     due_date = Column(Date)
