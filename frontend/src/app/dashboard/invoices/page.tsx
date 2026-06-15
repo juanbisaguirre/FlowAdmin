@@ -53,9 +53,16 @@ export default function InvoicesPage() {
           <p className="text-gray-500 dark:text-gray-400">Gestiona tus facturas electrónicas con TusFacturasAPP.</p>
         </div>
         
-        <Link href="/dashboard/invoices/new">
-          <Button className="bg-indigo-600 hover:bg-indigo-700">+ Nueva Factura</Button>
-        </Link>
+        <div className="flex gap-3">
+          <Link href="/dashboard/invoices/bulk">
+            <Button variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/50">
+              Carga Masiva
+            </Button>
+          </Link>
+          <Link href="/dashboard/invoices/new">
+            <Button className="bg-indigo-600 hover:bg-indigo-700">+ Nueva Factura</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700">

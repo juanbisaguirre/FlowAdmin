@@ -80,13 +80,19 @@ class BillingService:
 
     def _handle_pdf_and_s3(self, invoice: Invoice, credentials: Any):
         try:
-            pdf_bytes = self.provider.get_pdf(invoice.id, credentials)
+            from app.core.pdf_service import generate_invoice_pdf
+            from app.db.models import Tenant
+            
+            tenant = self.db.query(Tenant).filter(Tenant.id == self.tenant_id).first()
+            customer = self.db.query(Customer).filter(Customer.id == invoice.customer_id).first()
+            
+            pdf_bytes = generate_invoice_pdf(invoice, customer, tenant.commercial_name if tenant else "Empresa")
             
             from app.services.storage.s3 import S3StorageService
             s3_service = S3StorageService()
             
             file_name = f"facturas/{invoice.tenant_id}/{invoice.id}.pdf"
-            s3_service.upload_pdf(file_name, pdf_bytes)
+            s3_service.upload_file(file_name, pdf_bytes, content_type='application/pdf')
             
             invoice.pdf_url = file_name
             self.db.commit()

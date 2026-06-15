@@ -1,4 +1,5 @@
 import Link from "next/link"
+import AIAssistantWidget from "@/components/ai/AIAssistantWidget"
 
 export default function DashboardLayout({
   children,
@@ -54,6 +55,9 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      
+      {/* AI Assistant Widget Global Instance */}
+      <AIAssistantWidget />
     </div>
   )
 }
