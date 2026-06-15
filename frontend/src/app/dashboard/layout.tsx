@@ -21,11 +21,17 @@ export default function DashboardLayout({
             <Link href="/dashboard/clients" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
               Clientes
             </Link>
+            <Link href="/dashboard/products" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
+              Productos
+            </Link>
             <Link href="/dashboard/invoices" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
               Facturación
             </Link>
             <Link href="/dashboard/settings/billing" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
-              Configuración
+              Configuración API
+            </Link>
+            <Link href="/dashboard/settings/team" className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
+              Equipo
             </Link>
           </nav>
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">

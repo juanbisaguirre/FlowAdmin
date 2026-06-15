@@ -17,6 +17,12 @@ class Tenant(Base):
     address = Column(String)
     email = Column(String)
     phone = Column(String)
+    
+    # SaaS Fields
+    subscription_plan = Column(String, default="free")
+    subscription_status = Column(String, default="active")
+    subscription_valid_until = Column(Date, nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")

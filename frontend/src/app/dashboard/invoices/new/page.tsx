@@ -12,40 +12,59 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export default function NewInvoicePage() {
   const router = useRouter()
   const [customers, setCustomers] = useState<any[]>([])
+  const [products, setProducts] = useState<any[]>([])
   
   // Invoice form states
   const [customerId, setCustomerId] = useState("")
   const [invoiceType, setInvoiceType] = useState("C")
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0])
-  const [items, setItems] = useState([{ description: "", quantity: 1, unit_price: 0, tax_rate: 21 }])
+  const [items, setItems] = useState([{ description: "", quantity: 1, unit_price: 0, tax_rate: 21, product_id: "custom" }])
 
   useEffect(() => {
     // Fetch customers for the dropdown
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       const token = localStorage.getItem("token")
       if (!token) return
       try {
-        const res = await fetch("http://localhost:8000/api/v1/customers/", {
-          headers: { "Authorization": `Bearer ${token}` }
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setCustomers(data)
-        }
+        const [resCust, resProd] = await Promise.all([
+          fetch("http://localhost:8000/api/v1/customers/", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("http://localhost:8000/api/v1/products/", { headers: { "Authorization": `Bearer ${token}` } })
+        ])
+        if (resCust.ok) setCustomers(await resCust.json())
+        if (resProd.ok) setProducts(await resProd.json())
       } catch (e) {
         console.error(e)
       }
     }
-    fetchCustomers()
+    fetchData()
   }, [])
 
   const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, unit_price: 0, tax_rate: 21 }])
+    setItems([...items, { description: "", quantity: 1, unit_price: 0, tax_rate: 21, product_id: "custom" }])
   }
 
   const updateItem = (index: number, field: string, value: any) => {
     const newItems = [...items]
     newItems[index] = { ...newItems[index], [field]: value }
+    setItems(newItems)
+  }
+
+  const handleProductSelect = (index: number, productId: string) => {
+    const newItems = [...items]
+    if (productId === "custom") {
+      newItems[index] = { ...newItems[index], product_id: "custom" }
+    } else {
+      const p = products.find(prod => prod.id === productId)
+      if (p) {
+        newItems[index] = {
+          ...newItems[index],
+          product_id: p.id,
+          description: p.name,
+          unit_price: p.price,
+          tax_rate: p.vat_rate
+        }
+      }
+    }
     setItems(newItems)
   }
 
@@ -63,7 +82,7 @@ export default function NewInvoicePage() {
           invoice_type: invoiceType,
           issue_date: issueDate,
           items: items.map(item => ({
-            ...item,
+            description: item.description,
             quantity: Number(item.quantity),
             unit_price: Number(item.unit_price),
             tax_rate: Number(item.tax_rate)
@@ -88,7 +107,7 @@ export default function NewInvoicePage() {
   const total = subtotal + taxes
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nueva Factura</h1>
@@ -148,10 +167,11 @@ export default function NewInvoicePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40%]">Descripción</TableHead>
-                  <TableHead>Cantidad</TableHead>
-                  <TableHead>Precio Unitario</TableHead>
-                  <TableHead>IVA (%)</TableHead>
+                  <TableHead className="w-[15%]">Catálogo</TableHead>
+                  <TableHead className="w-[30%]">Descripción</TableHead>
+                  <TableHead className="w-[15%]">Cantidad</TableHead>
+                  <TableHead className="w-[15%]">Precio Unit.</TableHead>
+                  <TableHead className="w-[10%]">IVA (%)</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -159,7 +179,24 @@ export default function NewInvoicePage() {
                 {items.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>
+                      <Select 
+                        value={item.product_id} 
+                        onValueChange={(val) => handleProductSelect(index, val)}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Personalizado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="custom">Personalizado</SelectItem>
+                          {products.map(p => (
+                            <SelectItem key={p.id} value={p.id}>{p.code ? `${p.code} - ` : ''}{p.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
                       <Input 
+                        className="h-9"
                         value={item.description} 
                         onChange={(e) => updateItem(index, 'description', e.target.value)} 
                         placeholder="Servicio / Producto"
@@ -167,6 +204,7 @@ export default function NewInvoicePage() {
                     </TableCell>
                     <TableCell>
                       <Input 
+                        className="h-9"
                         type="number" 
                         value={item.quantity} 
                         onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)} 
@@ -174,6 +212,7 @@ export default function NewInvoicePage() {
                     </TableCell>
                     <TableCell>
                       <Input 
+                        className="h-9"
                         type="number" 
                         value={item.unit_price} 
                         onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)} 
@@ -184,7 +223,7 @@ export default function NewInvoicePage() {
                         value={item.tax_rate.toString()} 
                         onValueChange={(val) => updateItem(index, 'tax_rate', parseFloat(val))}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-9">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

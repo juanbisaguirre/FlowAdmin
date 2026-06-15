@@ -98,5 +98,27 @@ class BillingService:
             self.db.commit()
             
             logger.info(f"PDF for invoice {invoice.id} uploaded to S3 at {file_name}")
+            
+            # Send Email
+            from app.core.email_service import send_invoice_email
+            if customer and customer.email:
+                subject = f"Nueva Factura Disponible - {tenant.commercial_name if tenant else 'FlowAdmin'}"
+                body = f"""
+Hola {customer.business_name},
+
+Se ha generado una nueva factura a tu nombre por el total de ${invoice.total}.
+Adjuntamos el documento PDF correspondiente.
+
+Saludos cordiales,
+El equipo de {tenant.commercial_name if tenant else 'FlowAdmin'}
+"""
+                send_invoice_email(
+                    to_email=customer.email,
+                    subject=subject,
+                    body=body,
+                    pdf_bytes=pdf_bytes,
+                    filename=f"Factura_{invoice.invoice_number or invoice.id[:8]}.pdf"
+                )
+            
         except Exception as e:
             logger.error(f"Failed to handle PDF and S3 upload for invoice {invoice.id}: {e}")
