@@ -118,19 +118,18 @@ def emit_invoice(
     if invoice.status not in ("draft", "rejected"):
         raise HTTPException(status_code=400, detail="Only draft or rejected invoices can be emitted")
         
-    # Get Customer
-    from app.db.models import Customer
-    customer = db.query(Customer).filter(Customer.id == invoice.customer_id).first()
+    # Process emission using Celery Task instead of synchronous call
+    from app.tasks.billing_tasks import emit_invoice_task
     
-    # Process emission using BillingService
-    from app.services.billing.service import BillingService
+    invoice.status = "processing"
+    db.commit()
+    
     try:
-        billing_service = BillingService(db=db, tenant_id=current_user.tenant_id)
-        invoice = billing_service.process_invoice_emission(invoice, customer)
+        emit_invoice_task.delay(invoice.id, current_user.tenant_id)
     except Exception as e:
         import logging
-        logging.error(f"Emission failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Billing provider error: {str(e)}")
+        logging.error(f"Emission task queue failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Could not queue emission task: {str(e)}")
         
     return invoice
 
