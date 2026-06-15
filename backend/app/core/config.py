@@ -7,20 +7,20 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # POSTGRES
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "flowadmin")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "flowadmin_password")
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
-    POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "flowadmin_db")
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
-    )
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_SERVER: str
+    POSTGRES_PORT: str = "5432"
+    POSTGRES_DB: str
+    DATABASE_URL: str
 
     # AUTH
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-for-jwt-development-only")
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    # CORS
+    CORS_ORIGINS: str = ""
 
     class Config:
         case_sensitive = True
