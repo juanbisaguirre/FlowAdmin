@@ -11,7 +11,7 @@ from celery.result import AsyncResult
 
 router = APIRouter()
 
-UPLOAD_DIR = "/tmp/flowadmin_uploads"
+UPLOAD_DIR = "/tmp/gestionapp_uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/upload", status_code=status.HTTP_202_ACCEPTED)

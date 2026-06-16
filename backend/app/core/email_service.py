@@ -12,7 +12,7 @@ def send_invoice_email(to_email: str, subject: str, body: str, pdf_bytes: bytes,
     """
     msg = EmailMessage()
     msg['Subject'] = subject
-    msg['From'] = "noreply@flowadmin.com" # Should be configurable
+    msg['From'] = "noreply@gestionapp.com" # Should be configurable
     msg['To'] = to_email
     
     msg.set_content(body)

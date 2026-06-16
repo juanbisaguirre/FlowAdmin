@@ -9,7 +9,7 @@ from app.core.limiter import limiter
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="API for FlowAdmin SaaS Platform",
+    description="API for GestionApp SaaS Platform",
     version=settings.VERSION,
 )
 app.state.limiter = limiter
@@ -33,7 +33,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to FlowAdmin API"}
+    return {"message": "Welcome to GestionApp API"}
 
 @app.get("/health")
 def health_check():

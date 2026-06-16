@@ -13,7 +13,7 @@ export default function Home() {
             <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">FlowAdmin</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">GestionApp</span>
           </div>
           <nav className="hidden md:flex gap-6">
             <Link href="#features" className="text-sm font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">Características</Link>
@@ -38,7 +38,7 @@ export default function Home() {
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="inline-flex items-center rounded-full border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 text-sm font-medium text-indigo-800 dark:text-indigo-300 mb-8">
               <span className="flex h-2 w-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
-              FlowAdmin v2.0 ya está disponible
+              GestionApp v2.0 ya está disponible
             </div>
             <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-7xl mb-6">
               Facturación Inteligente con <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Cero Fricción</span>
@@ -104,7 +104,7 @@ export default function Home() {
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Todo lo que necesitas para tu administración</h2>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">FlowAdmin fue diseñado pensando en la velocidad y la eficiencia. Deja que la tecnología haga el trabajo pesado.</p>
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">GestionApp fue diseñado pensando en la velocidad y la eficiencia. Deja que la tecnología haga el trabajo pesado.</p>
             </div>
             
             <div className="grid md:grid-cols-3 gap-8">
@@ -205,7 +205,7 @@ export default function Home() {
         <section className="py-24 bg-indigo-600 dark:bg-indigo-900">
           <div className="container mx-auto px-4 md:px-6 text-center">
             <h2 className="text-3xl font-bold text-white sm:text-4xl mb-6">¿Listo para escalar tu negocio?</h2>
-            <p className="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">Únete a cientos de empresas que ya están automatizando su administración con FlowAdmin.</p>
+            <p className="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">Únete a cientos de empresas que ya están automatizando su administración con GestionApp.</p>
             <Link href="/register">
               <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 hover:text-indigo-700 rounded-full px-8 h-14 text-lg shadow-lg">
                 Crear una cuenta gratis
@@ -220,9 +220,9 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-indigo-600" />
-            <span className="text-lg font-bold text-gray-900 dark:text-white">FlowAdmin</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">GestionApp</span>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">© {new Date().getFullYear()} FlowAdmin Inc. Todos los derechos reservados.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">© {new Date().getFullYear()} GestionApp Inc. Todos los derechos reservados.</p>
           <div className="flex gap-4">
             <Link href="#" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Términos</Link>
             <Link href="#" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Privacidad</Link>

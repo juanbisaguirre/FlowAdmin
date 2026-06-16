@@ -53,7 +53,7 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Create Account</CardTitle>
           <CardDescription>
-            Register your company on FlowAdmin
+            Register your company on GestionApp
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleRegister}>

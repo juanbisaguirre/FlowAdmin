@@ -32,10 +32,26 @@ export default function LoginPage() {
       if (response.ok) {
         const data = await response.json()
         localStorage.setItem("token", data.access_token)
-        router.push("/dashboard")
+        
+        // Check role based on token or another API call
+        // For simplicity, we decode JWT (if it contains role) or fetch /users/me
+        // Assuming we fetch user details quickly:
+        const userRes = await fetch("http://localhost:8000/api/v1/auth/me", {
+          headers: { "Authorization": `Bearer ${data.access_token}` }
+        })
+        if (userRes.ok) {
+          const user = await userRes.json()
+          if (user.role === "superadmin") {
+            router.push("/superadmin")
+          } else {
+            router.push("/dashboard")
+          }
+        } else {
+          router.push("/dashboard")
+        }
       } else {
         const errData = await response.json()
-        setError(errData.detail || "Error logging in")
+        setError(errData.detail || "Invalid credentials")
       }
     } catch (err) {
       setError("Network error")
@@ -46,7 +62,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
       <Card className="w-full max-w-md shadow-lg border-t-4 border-t-indigo-600">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">FlowAdmin</CardTitle>
+          <CardTitle className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">GestionApp</CardTitle>
           <CardDescription>
             Enter your email to sign in to your account
           </CardDescription>

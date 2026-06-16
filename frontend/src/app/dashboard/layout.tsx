@@ -12,7 +12,7 @@ export default function DashboardLayout({
       <aside className="w-64 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block">
         <div className="h-full flex flex-col">
           <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">FlowAdmin</span>
+            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">GestionApp</span>
           </div>
           <nav className="flex-1 px-4 py-4 space-y-2">
             <Link href="/dashboard" className="flex items-center px-2 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300">
@@ -46,7 +46,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center md:hidden">
-            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">FlowAdmin</span>
+            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">GestionApp</span>
           </div>
           <div className="flex-1"></div>
           <div className="flex items-center space-x-4">

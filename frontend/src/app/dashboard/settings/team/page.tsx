@@ -124,7 +124,7 @@ export default function TeamSettingsPage() {
             <SheetHeader>
               <SheetTitle>Invitar al Equipo</SheetTitle>
               <SheetDescription>
-                Agrega un nuevo usuario a tu organización FlowAdmin.
+                Agrega un nuevo usuario a tu organización GestionApp.
               </SheetDescription>
             </SheetHeader>
             <form onSubmit={handleInvite} className="space-y-4 mt-6">
@@ -148,7 +148,7 @@ export default function TeamSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Rol</Label>
-                <Select value={role} onValueChange={setRole}>
+                <Select value={role} onValueChange={(val) => setRole(val)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

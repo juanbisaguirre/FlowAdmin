@@ -42,7 +42,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Resumen del Dashboard</h1>
-        <p className="text-base text-gray-500 dark:text-gray-400 mt-2">Bienvenido a FlowAdmin. Esto es lo que está pasando hoy.</p>
+        <p className="text-base text-gray-500 dark:text-gray-400 mt-2">Bienvenido a GestionApp. Esto es lo que está pasando hoy.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

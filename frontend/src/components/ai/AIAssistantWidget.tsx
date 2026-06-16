@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 export default function AIAssistantWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<{role: "bot"|"user", content: string, status?: "sending"|"accepted"|"error"}[]>([
-    { role: "bot", content: "¡Hola! Soy tu asistente de FlowAdmin. ¿En qué te puedo ayudar? (ej: 'Crear facturas de abril')" }
+    { role: "bot", content: "¡Hola! Soy tu asistente de GestionApp. ¿En qué te puedo ayudar? (ej: 'Crear facturas de abril')" }
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -87,7 +87,7 @@ export default function AIAssistantWidget() {
                 <Bot className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">FlowAdmin AI</h3>
+                <h3 className="font-semibold text-sm">GestionApp AI</h3>
                 <p className="text-xs text-indigo-100">En línea</p>
               </div>
             </div>

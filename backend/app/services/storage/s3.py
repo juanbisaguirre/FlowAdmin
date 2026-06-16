@@ -16,7 +16,7 @@ class S3StorageService:
             endpoint_url=getattr(settings, "AWS_ENDPOINT_URL", "http://minio:9000"),
             region_name=getattr(settings, "AWS_REGION", "us-east-1")
         )
-        self.bucket_name = getattr(settings, "AWS_BUCKET_NAME", "flowadmin-pdfs")
+        self.bucket_name = getattr(settings, "AWS_BUCKET_NAME", "gestionapp-pdfs")
 
     def ensure_bucket_exists(self):
         try:
