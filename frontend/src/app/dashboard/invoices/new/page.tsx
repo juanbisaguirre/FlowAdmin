@@ -9,10 +9,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
+interface Customer {
+  id: string;
+  business_name: string;
+  document_number: string;
+}
+
+interface Product {
+  id: string;
+  code: string;
+  name: string;
+  price: number;
+  vat_rate: number;
+}
+
 export default function NewInvoicePage() {
   const router = useRouter()
-  const [customers, setCustomers] = useState<any[]>([])
-  const [products, setProducts] = useState<any[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   
   // Invoice form states
   const [customerId, setCustomerId] = useState("")
@@ -32,8 +46,8 @@ export default function NewInvoicePage() {
         ])
         if (resCust.ok) setCustomers(await resCust.json())
         if (resProd.ok) setProducts(await resProd.json())
-      } catch (e) {
-        console.error(e)
+      } catch {
+        // ignore
       }
     }
     fetchData()
@@ -96,7 +110,7 @@ export default function NewInvoicePage() {
         const err = await res.json()
         alert(err.detail || "Error creating invoice")
       }
-    } catch (e) {
+    } catch {
       alert("Network error")
     }
   }
@@ -123,7 +137,7 @@ export default function NewInvoicePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Cliente</Label>
-              <Select value={customerId} onValueChange={setCustomerId}>
+              <Select value={customerId} onValueChange={(val) => setCustomerId(val as string)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un cliente..." />
                 </SelectTrigger>
@@ -137,7 +151,7 @@ export default function NewInvoicePage() {
             
             <div className="space-y-2">
               <Label>Tipo de Comprobante</Label>
-              <Select value={invoiceType} onValueChange={setInvoiceType}>
+              <Select value={invoiceType} onValueChange={(val) => setInvoiceType(val as string)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Tipo..." />
                 </SelectTrigger>
@@ -181,7 +195,7 @@ export default function NewInvoicePage() {
                     <TableCell>
                       <Select 
                         value={item.product_id} 
-                        onValueChange={(val) => handleProductSelect(index, val)}
+                        onValueChange={(val) => handleProductSelect(index, val as string)}
                       >
                         <SelectTrigger className="h-9">
                           <SelectValue placeholder="Personalizado" />
@@ -221,7 +235,7 @@ export default function NewInvoicePage() {
                     <TableCell>
                       <Select 
                         value={item.tax_rate.toString()} 
-                        onValueChange={(val) => updateItem(index, 'tax_rate', parseFloat(val))}
+                        onValueChange={(val) => updateItem(index, 'tax_rate', parseFloat(val as string))}
                       >
                         <SelectTrigger className="h-9">
                           <SelectValue />

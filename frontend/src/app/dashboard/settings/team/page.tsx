@@ -8,8 +8,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export default function TeamSettingsPage() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [error, setError] = useState("")
@@ -42,6 +49,7 @@ export default function TeamSettingsPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers()
   }, [])
 
@@ -72,7 +80,7 @@ export default function TeamSettingsPage() {
         const err = await res.json()
         setError(err.detail || "Error al invitar usuario")
       }
-    } catch (e) {
+    } catch {
       setError("Error de red")
     }
   }
@@ -100,7 +108,7 @@ export default function TeamSettingsPage() {
         const err = await res.json()
         alert(err.detail || "Error eliminando usuario")
       }
-    } catch (e) {
+    } catch {
       alert("Error de red")
     }
   }
@@ -148,7 +156,7 @@ export default function TeamSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Rol</Label>
-                <Select value={role} onValueChange={(val) => setRole(val)}>
+                <Select value={role} onValueChange={(val) => setRole(val as string)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

@@ -8,8 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+interface Customer {
+  id: string;
+  business_name: string;
+  document_type: string;
+  document_number: string;
+  vat_condition: string;
+  email: string;
+  phone: string;
+}
+
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<any[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [error, setError] = useState("")
@@ -37,8 +47,8 @@ export default function CustomersPage() {
         const data = await res.json()
         setCustomers(data)
       }
-    } catch (e) {
-      console.error(e)
+    } catch {
+      // ignore
     } finally {
       setLoading(false)
     }
@@ -84,7 +94,7 @@ export default function CustomersPage() {
         const err = await res.json()
         setError(err.detail || "Error saving customer")
       }
-    } catch (e) {
+    } catch {
       setError("Network error")
     }
   }
@@ -105,7 +115,7 @@ export default function CustomersPage() {
     setIsSheetOpen(true)
   }
 
-  const handleEditClick = (customer: any) => {
+  const handleEditClick = (customer: Customer) => {
     setEditingId(customer.id)
     setBusinessName(customer.business_name)
     setDocumentType(customer.document_type || "CUIT")
@@ -131,7 +141,7 @@ export default function CustomersPage() {
       } else {
         alert("Error eliminando cliente")
       }
-    } catch (e) {
+    } catch {
       alert("Error de red")
     }
   }
@@ -171,7 +181,7 @@ export default function CustomersPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2 col-span-1">
                   <Label>Tipo Doc.</Label>
-                  <Select value={documentType} onValueChange={setDocumentType}>
+                  <Select value={documentType} onValueChange={(val) => setDocumentType(val as string)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -188,7 +198,7 @@ export default function CustomersPage() {
               </div>
               <div className="space-y-2">
                 <Label>Condición frente al IVA</Label>
-                <Select value={vatCondition} onValueChange={setVatCondition}>
+                <Select value={vatCondition} onValueChange={(val) => setVatCondition(val as string)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

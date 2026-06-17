@@ -8,8 +8,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+interface Product {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  price: number;
+  vat_rate: number;
+}
+
 export default function ProductsPage() {
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
@@ -31,8 +40,8 @@ export default function ProductsPage() {
         const data = await res.json()
         setProducts(data)
       }
-    } catch (e) {
-      console.error(e)
+    } catch {
+      // ignore
     } finally {
       setLoading(false)
     }
@@ -68,7 +77,7 @@ export default function ProductsPage() {
       } else {
         alert("Error creando producto")
       }
-    } catch (e) {
+    } catch {
       alert("Error de red")
     }
   }
@@ -90,7 +99,7 @@ export default function ProductsPage() {
         headers: { "Authorization": `Bearer ${token}` }
       })
       if (res.ok) fetchProducts()
-    } catch (e) {
+    } catch {
       alert("Error eliminando")
     }
   }
@@ -107,8 +116,8 @@ export default function ProductsPage() {
           if (!open) resetForm()
           setIsSheetOpen(open)
         }}>
-          <SheetTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">+ Nuevo Producto</Button>
+          <SheetTrigger render={<Button className="bg-indigo-600 hover:bg-indigo-700" />}>
+            + Nuevo Producto
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
@@ -137,7 +146,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Tasa de IVA</Label>
-                  <Select value={vatRate} onValueChange={setVatRate}>
+                  <Select value={vatRate} onValueChange={(val) => setVatRate(val as string)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0">0%</SelectItem>

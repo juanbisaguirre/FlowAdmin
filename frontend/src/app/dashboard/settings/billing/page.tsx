@@ -6,12 +6,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
+interface Status {
+  provider: string;
+  has_apikey: boolean;
+  has_apitoken: boolean;
+  has_usertoken: boolean;
+}
+
 export default function BillingSettingsPage() {
   const [provider, setProvider] = useState("TusFacturas")
   const [apikey, setApikey] = useState("")
   const [apitoken, setApitoken] = useState("")
   const [usertoken, setUsertoken] = useState("")
-  const [status, setStatus] = useState<any>(null)
+  const [status, setStatus] = useState<Status | null>(null)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState("")
 
@@ -27,12 +34,13 @@ export default function BillingSettingsPage() {
         const data = await res.json()
         setStatus(data)
       }
-    } catch (e) {
-      console.error(e)
+    } catch {
+      // ignore
     }
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchStatus()
   }, [])
 
@@ -67,7 +75,7 @@ export default function BillingSettingsPage() {
         const err = await res.json()
         setMsg(err.detail || "Error guardando credenciales.")
       }
-    } catch (e) {
+    } catch {
       setMsg("Error de red.")
     } finally {
       setLoading(false)
